@@ -51,4 +51,37 @@ public class VideoDAO extends AbstractDAO<Video> implements IVideoDAO {
             em.close();
         }
     }
+    // --- SỬA/THÊM HÀM NÀY ---
+    @Override
+    public List<Video> findAllActive(int page, int pageSize) {
+        String hql = "SELECT v FROM Video v WHERE v.active = true ORDER BY v.id DESC";
+        // Tính vị trí bắt đầu cắt: (Trang hiện tại - 1) * Số lượng 1 trang
+        int firstResult = (page - 1) * pageSize;
+        return findMany(hql, firstResult, pageSize);
+    }
+
+    // --- THÊM HÀM NÀY (Để tính tổng số trang) ---
+    @Override
+    public long countActive() {
+        EntityManager em = XJPA.getEntityManager();
+        try {
+            String hql = "SELECT count(v) FROM Video v WHERE v.active = true";
+            return (long) em.createQuery(hql).getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Object[]> reportFavorites() {
+        String hql = "SELECT v.titile, count(f), min(f.likeDate), max(f.likeDate) " +
+                "FROM Video v LEFT JOIN v.favorites f " +
+                "GROUP BY v.titile";
+        EntityManager em = XJPA.getEntityManager();
+        try {
+            return em.createQuery(hql, Object[].class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
 }

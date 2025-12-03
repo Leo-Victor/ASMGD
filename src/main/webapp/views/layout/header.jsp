@@ -14,30 +14,50 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link active" href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Thịnh hành</a></li>
+                <li class="nav-item">
+                    <a class="nav-link ${empty currentType ? 'active text-danger fw-bold' : ''}"
+                       href="${pageContext.request.contextPath}/home">
+                       <i class="bi bi-house-door-fill"></i> Trang chủ
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link ${currentType == 'trending' ? 'active text-danger fw-bold' : ''}"
+                       href="${pageContext.request.contextPath}/home?type=trending">
+                       <i class="bi bi-fire"></i> Thịnh hành
+                    </a>
+                </li>
             </ul>
 
-            <div class="d-flex">
+            <div class="d-flex align-items-center">
                 <c:if test="${sessionScope.currentUser == null}">
                     <a href="${pageContext.request.contextPath}/login" class="btn btn-outline-primary rounded-pill px-4 btn-sm">
                         <i class="bi bi-person-circle"></i> Đăng nhập
                     </a>
                 </c:if>
+
                 <c:if test="${sessionScope.currentUser != null}">
+
+                    <c:if test="${sessionScope.currentUser.admin}">
+                        <a href="${pageContext.request.contextPath}/admin/videos"
+                           class="btn btn-danger btn-sm rounded-pill fw-bold me-3 shadow-sm">
+                            <i class="bi bi-speedometer2"></i> TRANG QUẢN TRỊ
+                        </a>
+                    </c:if>
+
                     <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle btn-sm rounded-pill" type="button" data-bs-toggle="dropdown">
-                            Xin chào, ${sessionScope.currentUser.fullname}
+                        <button class="btn btn-secondary dropdown-toggle btn-sm rounded-pill d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                            <img src="https://ui-avatars.com/api/?name=${sessionScope.currentUser.fullname}&background=random&size=24"
+                                 class="rounded-circle" width="24" height="24">
+                            <span>Xin chào, ${sessionScope.currentUser.fullname}</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/my-favorites">Yêu thích</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/edit-profile">Hồ sơ</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/change-password">Đổi mật khẩu</a></li>
+
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2 shadow">
+                            <li><a class="dropdown-item py-2" href="${pageContext.request.contextPath}/my-favorites"><i class="bi bi-heart-fill text-danger me-2"></i> Yêu thích</a></li>
+                            <li><a class="dropdown-item py-2" href="${pageContext.request.contextPath}/edit-profile"><i class="bi bi-person-gear me-2"></i> Hồ sơ</a></li>
+                            <li><a class="dropdown-item py-2" href="${pageContext.request.contextPath}/change-password"><i class="bi bi-key me-2"></i> Đổi mật khẩu</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <c:if test="${sessionScope.currentUser.admin}">
-                                <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/admin/videos">Quản trị viên</a></li>
-                            </c:if>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/logoff">Đăng xuất</a></li>
+                            <li><a class="dropdown-item py-2 text-warning" href="${pageContext.request.contextPath}/logoff"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
                         </ul>
                     </div>
                 </c:if>

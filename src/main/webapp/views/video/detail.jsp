@@ -79,17 +79,24 @@
                             <h6 class="mb-0 fw-bold">OE Official Channel</h6>
                             <small class="text-secondary">1.2M người đăng ký</small>
                         </div>
-                        <button class="btn btn-light rounded-pill fw-bold ms-4 px-3">Đăng ký</button>
+
+                        <button id="subBtn" class="btn btn-light rounded-pill fw-bold ms-4 px-3"
+                                onclick="toggleSubscribe()">
+                            Đăng ký
+                        </button>
                     </div>
 
                     <div class="d-flex gap-2 mt-2 mt-md-0">
-                        <a href="${path}/favorite?action=like&videoId=${video.id}" class="btn btn-action px-3">
-                            <i class="bi bi-hand-thumbs-up"></i> Thích
-                        </a>
-                        <a href="${path}/favorite?action=unlike&videoId=${video.id}" class="btn btn-action px-3">
-                            <i class="bi bi-hand-thumbs-down"></i>
-                        </a>
-                        <a href="${path}/share?videoId=${video.id}" class="btn btn-action px-3">
+
+                        <button id="likeBtnDetail" class="btn btn-action px-3" onclick="toggleLikeDetail('${video.id}')">
+                            <i id="likeIconDetail" class="bi bi-hand-thumbs-up"></i> Thích
+                        </button>
+
+                        <button id="dislikeBtnDetail" class="btn btn-action px-3" onclick="toggleDislike()">
+                            <i id="dislikeIconDetail" class="bi bi-hand-thumbs-down"></i>
+                        </button>
+
+                        <a href="${path}/share?videoId=${video.id}" class="btn btn-action px-3 text-decoration-none">
                             <i class="bi bi-share"></i> Chia sẻ
                         </a>
                     </div>
@@ -104,10 +111,21 @@
 
                 <div class="mt-4">
                     <h5>Bình luận</h5>
+
                     <div class="d-flex mt-3">
-                        <img src="https://ui-avatars.com/api/?name=Me&background=random" class="rounded-circle me-3" width="40">
-                        <input type="text" class="form-control bg-transparent text-white border-0 border-bottom rounded-0" placeholder="Viết bình luận...">
-                    </div>
+                            <img src="https://ui-avatars.com/api/?name=${sessionScope.currentUser.fullname != null ? sessionScope.currentUser.fullname : 'Guest'}&background=random"
+                                 class="rounded-circle me-3" width="40">
+
+                            <form class="w-100" onsubmit="event.preventDefault(); alert('Tính năng bình luận đang phát triển!');">
+                                <input type="text" class="form-control bg-transparent text-white border-0 border-bottom rounded-0"
+                                       placeholder="Viết bình luận...">
+
+                                <div class="d-flex justify-content-end mt-2">
+                                    <button class="btn btn-secondary btn-sm rounded-pill me-2">Hủy</button>
+                                    <button class="btn btn-primary btn-sm rounded-pill">Bình luận</button>
+                                </div>
+                            </form>
+                        </div>
                 </div>
             </div>
 
@@ -127,7 +145,7 @@
                                         <img src="${path}/images/${hisVideo.poster}"
                                              class="history-img"
                                              alt="${hisVideo.titile}"
-                                             onerror="this.src='https://via.placeholder.com/160x90?text=No+Image'">
+                                             onerror="this.onerror=null; this.src='https://placehold.co/600x400/333/FFF?text=No+Image'">
                                     </div>
                                     <div class="col-7">
                                         <div class="card-body p-0 py-2 pe-2">
@@ -148,5 +166,82 @@
     <jsp:include page="/views/layout/footer.jsp"/>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Xử lý nút Đăng ký
+        function toggleSubscribe() {
+            var btn = document.getElementById("subBtn");
+            if (btn.innerText === "Đăng ký") {
+                btn.innerText = "Đã đăng ký";
+                btn.classList.remove("btn-light");
+                btn.classList.add("btn-secondary"); // Chuyển màu xám tối
+                alert("Đã đăng ký kênh OE Official!");
+            } else {
+                btn.innerText = "Đăng ký";
+                btn.classList.remove("btn-secondary");
+                btn.classList.add("btn-light"); // Trở lại màu sáng
+            }
+        }
+
+        // Xử lý Like (Có gọi Server ngầm)
+        function toggleLikeDetail(videoId) {
+            var btn = document.getElementById("likeBtnDetail");
+            var icon = document.getElementById("likeIconDetail");
+
+            // Kiểm tra xem đang like hay chưa (dựa vào class icon)
+            if (icon.classList.contains("bi-hand-thumbs-up")) {
+                // Chưa like -> Chuyển thành Like
+                icon.classList.remove("bi-hand-thumbs-up");
+                icon.classList.add("bi-hand-thumbs-up-fill"); // Ngón tay cái đặc
+                btn.style.color = "#3ea6ff"; // Màu xanh (hoặc trắng sáng) để báo hiệu active
+
+                // Nếu đang Dislike thì tắt Dislike đi (Logic Youtube)
+                var dislikeIcon = document.getElementById("dislikeIconDetail");
+                if(dislikeIcon.classList.contains("bi-hand-thumbs-down-fill")) {
+                     toggleDislike();
+                }
+
+                // Gọi API
+                fetch('${path}/favorite?action=like&videoId=' + videoId);
+            } else {
+                // Đã like -> Bỏ like
+                icon.classList.remove("bi-hand-thumbs-up-fill");
+                icon.classList.add("bi-hand-thumbs-up"); // Ngón tay rỗng
+                btn.style.color = ""; // Về màu mặc định
+
+                // Gọi API
+                fetch('${path}/favorite?action=unlike&videoId=' + videoId);
+            }
+        }
+
+        // Xử lý Dislike (Giả lập giao diện)
+        function toggleDislike() {
+            var btn = document.getElementById("dislikeBtnDetail");
+            var icon = document.getElementById("dislikeIconDetail");
+
+            if (icon.classList.contains("bi-hand-thumbs-down")) {
+                // Chưa Dislike -> Dislike
+                icon.classList.remove("bi-hand-thumbs-down");
+                icon.classList.add("bi-hand-thumbs-down-fill");
+
+                // Nếu đang Like thì tắt Like đi
+                var likeIcon = document.getElementById("likeIconDetail");
+                if(likeIcon.classList.contains("bi-hand-thumbs-up-fill")) {
+                     // Gọi lại hàm like để nó tự tắt like và gọi API unlike
+                     // Lưu ý: Cần truyền ID video vào nếu gọi hàm, ở đây ta thao tác DOM trực tiếp cho nhanh
+                     likeIcon.classList.remove("bi-hand-thumbs-up-fill");
+                     likeIcon.classList.add("bi-hand-thumbs-up");
+                     document.getElementById("likeBtnDetail").style.color = "";
+                     // Gọi API unlike vì đã bỏ like
+                     var vidId = '${video.id}'; // Lấy ID từ EL
+                     fetch('${path}/favorite?action=unlike&videoId=' + vidId);
+                }
+            } else {
+                // Bỏ Dislike
+                icon.classList.remove("bi-hand-thumbs-down-fill");
+                icon.classList.add("bi-hand-thumbs-down");
+            }
+        }
+    </script>
 </body>
 </html>

@@ -13,4 +13,9 @@ public interface IVideoDAO extends IGenericDAO<Video>{
     List<Video> findByTitle(String title);
     // Tăng view
     void incrementViews(String videoId);
+
+    List<Video> findAllActive(int page, int pageSize); // <--- Sửa dòng này (thêm tham số)
+    long countActive(); // <--- dòng này để đếm tổng số video
+    //Trả về danh sách các mảng Object (Title, Count, Oldest, Newest)
+    List<Object[]> reportFavorites();
 }

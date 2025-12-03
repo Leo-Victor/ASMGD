@@ -20,6 +20,7 @@ import java.util.List;
 
 @WebServlet("/admin/reports")
 public class ReportServlet extends HttpServlet {
+    // Sử dụng Interface và Impl chuẩn (package chữ thường)
     private IFavoriteDAO favDAO = new FavoriteDAO();
     private IVideoDAO videoDAO = new VideoDAO();
     private IShareDAO shareDAO = new ShareDAO();
@@ -33,29 +34,34 @@ public class ReportServlet extends HttpServlet {
 
         request.setAttribute("tab", tab);
 
-        // Load danh sách video để đổ vào combobox
+        // 1. Luôn load danh sách video để đổ vào Dropdown (Combobox) cho Tab 2 và 3
         List<Video> videoList = videoDAO.findAll();
         request.setAttribute("videos", videoList);
 
+        // 2. Xử lý dữ liệu riêng cho từng Tab
         if (tab.equals("favorite-users")) {
-            // Tab 2: Lọc người yêu thích theo Video
+            // --- TAB 2: Người yêu thích theo Video ---
             String videoId = request.getParameter("videoId");
             if (videoId != null && !videoId.isEmpty()) {
-                List<Favorite> list = favDAO.findByVideoId(videoId); // Cần thêm hàm này trong IFavoriteDAO và FavoriteDAO
+                List<Favorite> list = favDAO.findByVideoId(videoId);
                 request.setAttribute("favUsers", list);
-                request.setAttribute("videoId", videoId);
+                request.setAttribute("videoId", videoId); // Giữ lại ID để selected combobox
             }
-        } else if (tab.equals("share-friends")) {
-            // Tab 3: Lọc người chia sẻ theo Video
+        }
+        else if (tab.equals("share-friends")) {
+            // --- TAB 3: Người chia sẻ theo Video ---
             String videoId = request.getParameter("videoId");
             if (videoId != null && !videoId.isEmpty()) {
-                List<Share> list = shareDAO.findByVideoId(videoId); // Cần thêm hàm này trong IShareDAO và ShareDAO
+                List<Share> list = shareDAO.findByVideoId(videoId);
                 request.setAttribute("shareList", list);
                 request.setAttribute("videoId", videoId);
             }
-        } else {
-            // Tab 1: Thống kê tổng hợp (Cần viết Procedure hoặc Query phức tạp, ở đây hiển thị list video tạm)
-            request.setAttribute("reportList", videoList);
+        }
+        else {
+            // --- TAB 1: Thống kê tổng hợp (MẶC ĐỊNH) ---
+            // QUAN TRỌNG: Gọi hàm reportFavorites() trả về Object[] để tránh lỗi Lazy
+            List<Object[]> list = videoDAO.reportFavorites();
+            request.setAttribute("reportList", list);
         }
 
         request.getRequestDispatcher("/views/admin/reports.jsp").forward(request, response);
